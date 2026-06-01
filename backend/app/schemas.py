@@ -10,13 +10,28 @@ class ProductBase(BaseModel):
     stock_quantity: int = Field(..., ge=0)
 
 class ProductCreate(ProductBase):
-    pass
-
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "Ergonomic Office Chair",
+                "sku": "CHAIR-001",
+                "price": 199.99,
+                "stock_quantity": 50
+            }
+        }
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     sku: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
     stock_quantity: Optional[int] = Field(None, ge=0)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "price": 179.99,
+                "stock_quantity": 45
+            }
+        }
 
 class Product(ProductBase):
     id: int
@@ -31,7 +46,14 @@ class CustomerBase(BaseModel):
     phone: Optional[str] = None
 
 class CustomerCreate(CustomerBase):
-    pass
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "full_name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "phone": "+1234567890"
+            }
+        }
 
 class Customer(CustomerBase):
     id: int
@@ -47,6 +69,19 @@ class OrderItemCreate(BaseModel):
 class OrderCreate(BaseModel):
     customer_id: int
     items: List[OrderItemCreate]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "customer_id": 1,
+                "items": [
+                    {
+                        "product_id": 1,
+                        "quantity": 2
+                    }
+                ]
+            }
+        }
 
 class OrderItemResponse(BaseModel):
     id: int
