@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: inventory-backend
+    env: docker
+    region: oregon
+    plan: free
+    rootDir: backend
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inventory-db
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://your-vercel-app.vercel.app # Update this after Vercel deployment
+      - key: LOW_STOCK_THRESHOLD
+        value: 10
+
+databases:
+  - name: inventory-db
+    databaseName: inventory
+    user: admin
+    region: oregon
+    plan: free
