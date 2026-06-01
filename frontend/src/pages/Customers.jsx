@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { customersApi } from '../services/api';
-import { ErrorAlert, TableSkeleton, Button, EmptyState } from '../components/UI';
+import { ErrorAlert, TableSkeleton, Button, EmptyState, ConfirmModal } from '../components/UI';
 import { Plus, Trash2, Search, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -15,6 +15,9 @@ const Customers = () => {
   const [formData, setFormData] = useState({ full_name: '', email: '', phone: '' });
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Delete Modal State
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, name: '' });
 
   useEffect(() => {
     fetchCustomers();
@@ -32,8 +35,13 @@ const Customers = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this customer?')) return;
+  const confirmDelete = (id, name) => {
+    setDeleteModal({ isOpen: true, id, name });
+  };
+
+  const executeDelete = async () => {
+    const { id } = deleteModal;
+    setDeleteModal({ isOpen: false, id: null, name: '' });
     try {
       await customersApi.delete(id);
       setCustomers(customers.filter((c) => c.id !== id));
@@ -117,7 +125,7 @@ const Customers = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.phone || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleDelete(customer.id)} className="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
+                      <button onClick={() => confirmDelete(customer.id, customer.full_name)} className="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </td>
@@ -129,7 +137,7 @@ const Customers = () => {
         </div>
       ) : (
         <EmptyState 
-          title="No customers found"
+          title="No Customers Found"
           description={searchQuery ? `No customers match your search "${searchQuery}".` : "Your customer database is empty. Add your first customer."}
           icon={Users}
           action={
@@ -181,6 +189,15 @@ const Customers = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null, name: '' })}
+        onConfirm={executeDelete}
+        title="Delete Customer"
+        message="Are you sure you want to permanently delete this customer? This action cannot be undone and will fail if they have active orders."
+        itemName={deleteModal.name}
+      />
     </div>
   );
 };

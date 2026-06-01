@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ordersApi, customersApi, productsApi } from '../services/api';
-import { ErrorAlert, TableSkeleton, Button, Badge, EmptyState } from '../components/UI';
+import { ErrorAlert, TableSkeleton, Button, Badge, EmptyState, ConfirmModal } from '../components/UI';
 import { Plus, Trash2, ShoppingCart, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -20,6 +20,9 @@ const Orders = () => {
   const [orderItems, setOrderItems] = useState([{ product_id: '', quantity: 1 }]);
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Delete Modal State
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, name: '' });
 
   useEffect(() => {
     fetchOrders();
@@ -74,8 +77,13 @@ const Orders = () => {
     setOrderItems(newItems);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to cancel and delete this order?')) return;
+  const confirmDelete = (id) => {
+    setDeleteModal({ isOpen: true, id, name: `Order #${id.toString().padStart(4, '0')}` });
+  };
+
+  const executeDelete = async () => {
+    const { id } = deleteModal;
+    setDeleteModal({ isOpen: false, id: null, name: '' });
     try {
       await ordersApi.delete(id);
       setOrders(orders.filter((o) => o.id !== id));
@@ -200,7 +208,7 @@ const Orders = () => {
                       ${order.total_amount.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleDelete(order.id)} className="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
+                      <button onClick={() => confirmDelete(order.id)} className="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </td>
@@ -212,7 +220,7 @@ const Orders = () => {
         </div>
       ) : (
         <EmptyState 
-          title="No orders found"
+          title="No Orders Found"
           description={searchQuery ? `No orders match your search "${searchQuery}".` : "You haven't received any orders yet."}
           icon={ShoppingCart}
           action={
@@ -293,6 +301,15 @@ const Orders = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null, name: '' })}
+        onConfirm={executeDelete}
+        title="Delete Order"
+        message="Are you sure you want to permanently delete this order? This action cannot be undone."
+        itemName={deleteModal.name}
+      />
     </div>
   );
 };

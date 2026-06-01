@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { productsApi } from '../services/api';
-import { ErrorAlert, TableSkeleton, Button, Badge, EmptyState } from '../components/UI';
+import { ErrorAlert, TableSkeleton, Button, Badge, EmptyState, ConfirmModal } from '../components/UI';
 import { Plus, Trash2, Search, PackageSearch } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -15,6 +15,9 @@ const Products = () => {
   const [formData, setFormData] = useState({ name: '', sku: '', price: '', stock_quantity: '' });
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Delete Modal State
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, name: '' });
 
   useEffect(() => {
     fetchProducts();
@@ -32,8 +35,13 @@ const Products = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
+  const confirmDelete = (id, name) => {
+    setDeleteModal({ isOpen: true, id, name });
+  };
+
+  const executeDelete = async () => {
+    const { id } = deleteModal;
+    setDeleteModal({ isOpen: false, id: null, name: '' });
     try {
       await productsApi.delete(id);
       setProducts(products.filter((p) => p.id !== id));
@@ -131,7 +139,7 @@ const Products = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleDelete(product.id)} className="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
+                      <button onClick={() => confirmDelete(product.id, product.name)} className="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50">
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </td>
@@ -143,7 +151,7 @@ const Products = () => {
         </div>
       ) : (
         <EmptyState 
-          title="No products found"
+          title="No Products Found"
           description={searchQuery ? `No products match your search "${searchQuery}".` : "Get started by creating your first product in the inventory."}
           icon={PackageSearch}
           action={
@@ -176,7 +184,7 @@ const Products = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">SKU (Stock Keeping Unit)</label>
                       <input required type="text" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-sm font-mono" placeholder="e.g. CHAIR-001" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
                         <input required type="number" step="0.01" min="0.01" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 sm:text-sm" placeholder="0.00" />
@@ -201,6 +209,15 @@ const Products = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null, name: '' })}
+        onConfirm={executeDelete}
+        title="Delete Product"
+        message="Are you sure you want to permanently delete this product? This action cannot be undone."
+        itemName={deleteModal.name}
+      />
     </div>
   );
 };
