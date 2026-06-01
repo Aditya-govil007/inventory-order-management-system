@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { dashboardApi } from '../services/api';
 import { ErrorAlert, TableSkeleton, EmptyState } from '../components/UI';
-import { Package, Users, ShoppingCart, AlertTriangle, ArrowRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { Package, Users, ShoppingCart, AlertTriangle, ArrowRight, Activity, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -31,10 +31,10 @@ const Dashboard = () => {
   if (!stats) return null;
 
   const cards = [
-    { name: 'Total Products', value: stats.total_products, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', gradient: 'from-blue-500/10 via-transparent to-transparent', trend: '+12%', trendUp: true, link: '/products' },
-    { name: 'Total Customers', value: stats.total_customers, icon: Users, color: 'text-green-600', bg: 'bg-green-50', gradient: 'from-green-500/10 via-transparent to-transparent', trend: '+5%', trendUp: true, link: '/customers' },
-    { name: 'Total Orders', value: stats.total_orders, icon: ShoppingCart, color: 'text-purple-600', bg: 'bg-purple-50', gradient: 'from-purple-500/10 via-transparent to-transparent', trend: '+18%', trendUp: true, link: '/orders' },
-    { name: 'Low Stock Alerts', value: stats.low_stock_products.length, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', gradient: 'from-red-500/10 via-transparent to-transparent', trend: '-2%', trendUp: false, link: '/products' },
+    { name: 'Total Products', value: stats.total_products, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', gradient: 'from-blue-500/10 via-transparent to-transparent', status: 'Live Data', statusIcon: Activity, link: '/products' },
+    { name: 'Total Customers', value: stats.total_customers, icon: Users, color: 'text-green-600', bg: 'bg-green-50', gradient: 'from-green-500/10 via-transparent to-transparent', status: 'Live Data', statusIcon: Activity, link: '/customers' },
+    { name: 'Total Orders', value: stats.total_orders, icon: ShoppingCart, color: 'text-purple-600', bg: 'bg-purple-50', gradient: 'from-purple-500/10 via-transparent to-transparent', status: 'Live Data', statusIcon: Activity, link: '/orders' },
+    { name: 'Low Stock Alerts', value: stats.low_stock_products.length, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', gradient: 'from-red-500/10 via-transparent to-transparent', status: 'Real Time', statusIcon: Clock, link: '/products' },
   ];
 
   return (
@@ -55,9 +55,9 @@ const Dashboard = () => {
                       <dd className="text-3xl font-bold text-gray-900 tracking-tight">{card.value}</dd>
                     </div>
                   </div>
-                  <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${card.trendUp ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'}`}>
-                    {card.trendUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                    {card.trend}
+                  <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider text-gray-500 bg-gray-50 border border-gray-100`}>
+                    <card.statusIcon className="w-3.5 h-3.5 text-gray-400" />
+                    {card.status}
                   </div>
                 </div>
               </div>
