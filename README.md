@@ -1,6 +1,12 @@
-# Inventory and Order Management System
+# Inventory & Order Management System
 
-A production-ready full-stack application for managing products, customers, and orders. Built with FastAPI, React (Vite), PostgreSQL, and Tailwind CSS.
+A cloud-deployed full-stack inventory management system built with FastAPI, React, PostgreSQL, and Docker.
+
+## Live Demo
+
+- Frontend: https://inventory-order-management-system-eight.vercel.app/
+- API Docs: https://inventory-backend-vfpg.onrender.com/docs
+- GitHub Repository: https://github.com/Aditya-govil007/inventory-order-management-system
 
 ## Features
 - **Dashboard**: High-level metrics and low-stock alerts.
@@ -8,10 +14,31 @@ A production-ready full-stack application for managing products, customers, and 
 - **Customer Management**: Maintain customer records.
 - **Order Management**: Advanced multi-product order creation with strict stock validation and automatic inventory deduction.
 
+## Business Rules
+
+- SKU values must be unique.
+- Customer email addresses must be unique.
+- Product stock cannot be negative.
+- Orders automatically deduct inventory.
+- Order creation is transactional and rolls back on failure.
+- Low-stock alerts are generated automatically.
+
 ## Architecture & Tech Stack
 - **Backend**: Python 3.11, FastAPI, SQLAlchemy 2.0, Pydantic, PostgreSQL.
 - **Frontend**: Node 22, React 19, Vite, TailwindCSS 3.4.
 - **Infrastructure**: Docker, Docker Compose, Nginx.
+
+## System Architecture
+
+```text
+React (Vercel)
+       │
+       ▼
+FastAPI (Render)
+       │
+       ▼
+PostgreSQL (Render)
+```
 
 ## Local Development Setup
 
@@ -74,7 +101,28 @@ The backend automatically generates interactive OpenAPI documentation. Once runn
 - `GET, POST, DELETE /customers/`: Standard CRUD. Email must be valid and unique.
 - `POST /orders/`: Transactional endpoint. Expects `customer_id` and an array of `items` (`product_id`, `quantity`). Automatically verifies stock, computes total price, deducts inventory, and links relationships. Rolls back entirely if any validation fails.
 
+
+## Challenges & Learnings
+
+During deployment, I encountered CORS issues between the Vercel frontend and Render backend. This was resolved by configuring FastAPI's CORSMiddleware and environment-based origin management.
+
+Key concepts learned:
+
+- REST API design
+- Database relationships and foreign keys
+- Transaction management with PostgreSQL
+- Docker containerization
+- Cloud deployment with Render and Vercel
+- CORS and cross-origin communication
+- API documentation with Swagger/OpenAPI
+
 ## Known Limitations
-- **Authentication**: Currently, there is no user authentication (JWT/OAuth) implemented. The API is open.
-- **Pagination**: The GET endpoints use basic `skip` and `limit` query parameters but do not return full pagination metadata (e.g., total pages).
-- **Soft Deletes**: Deleting products or customers cascades/fails depending on DB rules. In a true enterprise system, soft-deletes (flagging `is_active=False`) are often preferred over hard DB deletion to preserve order history.
+
+- Authentication and authorization are not implemented.
+- Pagination metadata is not currently available.
+- Soft deletes are not implemented.
+- Dashboard analytics are based on current data only.
+
+
+
+
